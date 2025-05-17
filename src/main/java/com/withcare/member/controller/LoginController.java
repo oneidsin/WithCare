@@ -35,6 +35,16 @@ public class LoginController {
 		
 		return result;
 	}
+	
+	@PostMapping("/logout") // 일단 세션 처리 해놨는데 토큰 버리는 식으로 바꿀거
+	public Map<String, Object> logout(HttpSession session) {
+	    Map<String, Object> result = new HashMap<>();
+	    
+	    session.invalidate(); 
+	    
+	    result.put("success", true);
+	    return result;
+	}
 
 
 }
