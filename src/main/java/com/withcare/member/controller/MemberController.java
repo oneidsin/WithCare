@@ -23,6 +23,8 @@ public class MemberController {
 	
 	@Autowired MemberService svc;
 	
+	// 회원 탈퇴
+	
 	@PutMapping("/delete/{id}")
 	public Map<String, Object> delete(@PathVariable String id) {
 		

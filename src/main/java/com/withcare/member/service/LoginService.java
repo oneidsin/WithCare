@@ -26,5 +26,14 @@ public class LoginService {
 		return dao.findId(name, year, email);
 	}
 
+	public String findPw(String id, String name, String year, String email) {
+		return dao.findPw(id, name, year, email);
+	}
+
+	public boolean resetPw(String id, String newPw) {
+		int updated = dao.updatePw(id, newPw);
+	    return updated > 0;
+	}
+
 
 }

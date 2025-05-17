@@ -13,5 +13,13 @@
  <select id="findId" resultType="String">
     SELECT id FROM member WHERE name = #{name} AND year = #{year} AND email = #{email}
 </select>
+
+<select id="findPw" resultType="String">
+    SELECT pw FROM member WHERE id = #{id} AND name = #{name} AND year = #{year} AND email = #{email}
+</select>
+
+<update id="updatePw">
+    UPDATE member SET pw = #{newPw} WHERE id = #{id}
+</update>
  
 </mapper>
