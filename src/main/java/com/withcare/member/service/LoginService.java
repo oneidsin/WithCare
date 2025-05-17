@@ -22,5 +22,9 @@ public class LoginService {
 		return cnt>0;
 	}
 
+	public String findId(String name, String year, String email) {
+		return dao.findId(name, year, email);
+	}
+
 
 }

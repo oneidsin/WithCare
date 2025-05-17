@@ -9,4 +9,6 @@ public interface LoginDAO {
 
 	int login(Map<String, String> params);
 
+	String findId(String name, String year, String email);
+
 }

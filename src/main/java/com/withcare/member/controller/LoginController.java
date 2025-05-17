@@ -8,8 +8,12 @@ import javax.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.withcare.member.service.LoginService;
@@ -45,6 +49,21 @@ public class LoginController {
 	    result.put("success", true);
 	    return result;
 	}
+	
+	@GetMapping("/find-id")
+    public ResponseEntity<String> findId(
+            @RequestParam String name,
+            @RequestParam String year,
+            @RequestParam String email) {
+
+        String userId = svc.findId(name, year, email);
+
+        if (userId != null) {
+            return ResponseEntity.ok(userId);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("일치하는 아이디가 없습니다.");
+        }
+    }
 
 
 }
