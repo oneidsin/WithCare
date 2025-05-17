@@ -4,4 +4,10 @@
 >
 
 <mapper namespace="com.withcare.member.dao.LoginDAO">
+
+<select id="login" parameterType="map" resultType="int">
+ 	SELECT COUNT(id) FROM member 
+ 		WHERE id =#{id} AND pw = #{pw}
+ </select>
+ 
 </mapper>
