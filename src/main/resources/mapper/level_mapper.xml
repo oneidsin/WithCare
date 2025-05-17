@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC   "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.withcare.profile.dao.LevelDAO">
+    <!-- 사용자의 레벨을 조회(getMemberLevel) -->
+    <select id="getMemberLevel" parameterType="map">
+        SELECT
+            m.id AS user_id,
+            l.lv_idx,
+            l.lv_name,
+            l.lv_icon,
+            p.intro
+        FROM
+            member m
+                JOIN
+                level l ON m.lv_idx = l.lv_idx
+                LEFT JOIN
+                profile p ON m.id = p.id
+        WHERE
+            m.id = #{id}
+    </select>
+
+    <!-- 사용자의 작성글, 댓글, 추천받은 수, 타임라인 수, 접속 수를 가져옴(getMemberLevelCondition) -->
+    <select id="getMemberLevelCondition" parameterType="map">
+        SELECT
+            m.id,
+            m.lv_idx,
+            (SELECT COUNT(*) FROM post p WHERE p.id = m.id) AS post_count,
+            (SELECT COUNT(*) FROM comment c WHERE c.id = m.id) AS comment_count,
+            (SELECT COUNT(*) FROM timeline tl WHERE tl.time_user_id = m.id) AS timeline_count,
+            (SELECT COUNT(ly.post_idx)
+             FROM likeyn ly
+                      JOIN post p ON ly.post_idx = p.post_idx
+             WHERE p.id = m.id AND ly.like_type = 1
+            ) AS like_count,
+            pr.access_cnt AS access_count
+        FROM
+            member m
+                LEFT JOIN
+                profile pr ON m.id = pr.id
+        WHERE
+            m.id = #{id}
+    </select>
+
+    <!-- 사용자 레벨업 -->
+    <!--<update id="getMemberLevelCount" parameterType="map">
+
+    </update>-->
+</mapper>
