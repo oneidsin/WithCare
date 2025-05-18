@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.withcare.member.service.JoinService;
+import com.withcare.util.JwtToken.JwtUtils;
 
 @CrossOrigin
 @RestController
@@ -46,17 +47,26 @@ public class JoinController {
 	}
 	
 	// 회원가입
-	@PostMapping("/join")
-	public Map<String, Object> join(@RequestBody Map<String, String> params){
-		
-		log.info("회원가입 : "+params);
-		
-		boolean success = svc.join(params);
-		result = new HashMap<String,Object>();
-		result.put("success", success);
-		
-		return result;
-	}
+    @PostMapping("/join")
+    public Map<String, Object> join(@RequestBody Map<String, String> params) {
+        log.info("회원가입 : " + params);
+
+        boolean success = svc.join(params);
+        result = new HashMap<String, Object>();
+        result.put("success", success);
+
+        if (success) {
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("id", params.get("id"));       
+            claims.put("name", params.get("name"));   
+
+            // 토큰 발급
+            String token = JwtUtils.setToken(claims);
+            result.put("token", token);
+        }
+
+        return result;
+    }
 	
 	
 	
