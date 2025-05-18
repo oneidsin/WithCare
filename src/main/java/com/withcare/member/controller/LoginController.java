@@ -49,13 +49,13 @@ public class LoginController {
 	
 	// 로그아웃
 	
-	@PostMapping("/logout") // 일단 세션 처리 해놨는데 토큰 버리는 식으로 바꿀거
-	public Map<String, Object> logout(HttpSession session) {
+	@PostMapping("/logout") 
+	public Map<String, Object> logout() {
 	    Map<String, Object> result = new HashMap<>();
 	    
-	    session.invalidate(); 
-	    
 	    result.put("success", true);
+	    result.put("msg", "로그아웃 되었습니다.");
+	    
 	    return result;
 	}
 	

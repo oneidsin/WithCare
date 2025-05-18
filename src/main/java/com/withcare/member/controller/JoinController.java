@@ -46,7 +46,7 @@ public class JoinController {
 		return result;
 	}
 	
-	// 회원가입
+	// 회원가입 (토큰 O --> 회원가입 하자마자 자동 로그인 됨)
     @PostMapping("/join")
     public Map<String, Object> join(@RequestBody Map<String, String> params) {
         log.info("회원가입 : " + params);
