@@ -60,7 +60,6 @@ public class JoinController {
             claims.put("id", params.get("id"));       
             claims.put("name", params.get("name"));   
 
-            // 토큰 발급
             String token = JwtUtils.setToken(claims);
             result.put("token", token);
         }
