@@ -1,15 +1,21 @@
 package com.withcare.profile.dao;
 
+import com.withcare.profile.dto.LevelDTO;
+import com.withcare.profile.dto.MemberActivityDTO;
+import com.withcare.profile.dto.MemberLevelDTO;
 import org.apache.ibatis.annotations.Mapper;
 
-import java.util.Map;
+import java.util.List;
 
 @Mapper
 public interface LevelDAO {
 
-    Map<String, Object> getMemberLevel(String id);
+    MemberLevelDTO getMemberLevel(String id);
 
-    Map<String, Object> getMemberLevelCondition(String id);
+    MemberActivityDTO getMemberActivity(String id);
 
-    //Map<String, Object> getMemberLevelCount(String id);
+    List<LevelDTO> getAllLevels();
+
+    int updateMemberLevel(String id, int lv_idx);
+
 }

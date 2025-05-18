@@ -1,5 +1,7 @@
 package com.withcare.profile.controller;
 
+import com.withcare.profile.dto.MemberActivityDTO;
+import com.withcare.profile.dto.MemberLevelDTO;
 import com.withcare.profile.service.LevelService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @CrossOrigin
@@ -20,32 +21,25 @@ public class LevelController {
     @Autowired
     LevelService svc;
 
-    Map<String, Object> result = null;
-
-    // 사용자 레벨 출력
+    // 사용자 레벨 정보 가져오기
     @GetMapping("/{id}/level/list")
-    public Map<String, Object> getMemberLevel(@PathVariable String id) {
+    public MemberLevelDTO getMemberLevel(@PathVariable String id) {
         log.info("레벨 요청 아이디 : {}", id);
-        result = new HashMap<>();
-        result = svc.getMemberLevel(id);
-        return result;
+        return svc.getMemberLevel(id);
     }
 
     // 사용자의 작성글 수, 댓글 수, 추천받은 수, 타임라인 수, 접속 수
-    @GetMapping("/{id}/level/list")
-    public Map<String, Object> getMemberLevelCondition(@PathVariable String id) {
-        result = new HashMap<>();
-        result = svc.getMemberLevelCondition(id); // 사용자의 작성글, 댓글, 추천받은 수, 타임라인 수, 접속 수를 가져옴(getLevelList)
-        return result;
+    @GetMapping("/{id}/level/activity")
+    public MemberActivityDTO getMemberActivity(@PathVariable String id) {
+        MemberActivityDTO dto = svc.getMemberActivity(id);
+        log.info("activity : {}", dto);
+        return dto;
     }
 
-    // 레벨 자동 계산
-    @GetMapping("/{id}/level/levelCount")
-    public Map<String, Object> getMemberLevelCount(@PathVariable String id) {
-        log.info("레벨 자동 계산 : {}", id);
-        result = new HashMap<>();
-        boolean success = svc.getMemberLevelCondition(id).isEmpty();
-        result.put("success", success);
-        return result;
+    // 레벨 조건 계산 후 레벨 업데이트
+    @GetMapping("/{id}/level/update")
+    public Map<String, Object> calculateAndUpdateLevel(@PathVariable String id) {
+        log.info("레벨 자동 계산 요청: {}", id);
+        return svc.calculateAndUpdateLevel(id);
     }
 }
