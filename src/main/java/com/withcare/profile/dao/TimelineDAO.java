@@ -9,5 +9,7 @@ public interface TimelineDAO {
 
 	void writeTimeline(TimelineDTO dto);
 
+	int update_timeline(TimelineDTO dto);
+
 
 }

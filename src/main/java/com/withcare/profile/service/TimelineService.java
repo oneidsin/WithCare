@@ -19,4 +19,8 @@ public class TimelineService {
 		dao.writeTimeline(dto);
 	}
 
+	public void update_timeline(TimelineDTO dto) {
+		dao.update_timeline(dto);		
+	}
+
 }

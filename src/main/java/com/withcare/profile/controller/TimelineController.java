@@ -6,7 +6,9 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,6 +38,13 @@ public class TimelineController {
 		result.put("msg", "타임라인 등록이 완료 되었습니다.");
 		
 		return result;
+	}
+	
+	@PutMapping("/timeline/update")
+	public ResponseEntity<String> update_timeline (@RequestBody TimelineDTO dto){
+		svc.update_timeline(dto);
+		
+		return ResponseEntity.ok("updated");
 	}
 	
 
