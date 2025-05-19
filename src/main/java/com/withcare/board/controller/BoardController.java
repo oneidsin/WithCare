@@ -36,6 +36,14 @@ public class BoardController {
 			@RequestHeader Map<String, String>header){
 		
 		result = new HashMap<String, Object>();
+		int lvIdx = Integer.parseInt(header.get("lv_idx")); // 레벨 확인
+		
+	    if(lvIdx != 7) {
+	    	// 관리자 아니면 게시판 생성 불가
+	        result.put("success", false);
+	        return result;
+	    }
+	    
 		boolean success = svc.boardWrite(boardDTO);
 		result.put("idx", boardDTO.getBoard_idx());
 		result.put("success", success);
@@ -50,6 +58,13 @@ public class BoardController {
 			@RequestHeader Map<String, String>header){
 		
 		result = new HashMap<String, Object>();
+		int lvIdx = Integer.parseInt(header.get("lv_idx"));
+		
+	    if(lvIdx != 7) {
+	        result.put("success", false);
+	        return result;
+	    }
+		
 		boolean success = svc.boardUpdate(boardDTO);
 		result.put("idx", boardDTO.getBoard_idx());
 		result.put("success", success);
@@ -57,18 +72,35 @@ public class BoardController {
 		return result;
 	}
 	
-	// 게시판 블라인드 (PutMapping 블라인드 처리라서 blind_yn 만 true 로 바꿔주면 될듯?)
+	// 게시판 블라인드
 	@PutMapping("/board/delete")
 	public Map<String, Object>boardDelete(
 			@RequestBody BoardDTO boardDTO,
 			@RequestHeader Map<String, String>header){
 		
 		result = new HashMap<String, Object>();
+	    int lvIdx = Integer.parseInt(header.get("lv_idx"));
+	    
+	    if(lvIdx != 7) {
+	        result.put("success", false);
+	        return result;
+	    }
+	    
 		boolean success = svc.boardDelete(boardDTO);
 		result.put("idx", boardDTO.getBoard_idx());
 		result.put("success", success);
 		
 		return result;
+	}
+	
+	@GetMapping("/board/list/{page}")
+	public Map<String, Object>boardList(
+			@PathVariable int page,
+			@RequestParam int board_idx,
+			@RequestHeader Map<String, String>header){
+		
+		String id = header.get("id");
+		return svc.boardList(board_idx, page, id);
 	}
 	
 }

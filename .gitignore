@@ -37,3 +37,10 @@ mvnw
 mvnw.cmd
 src/test/
 .mvn/
+<<<<<<< HEAD
+src/main/resources/logback-spring.xml
+src/main/resources/log4jdbc.log4j2.properties
+/.metadata/
+=======
+>>>>>>> origin/master
+*_BACKUP*
