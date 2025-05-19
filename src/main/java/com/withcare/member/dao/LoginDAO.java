@@ -13,6 +13,5 @@ public interface LoginDAO {
 
 	String findPw(String id, String name, String year, String email);
 
-	int updatePw(String id, String newPw);
-
+	int updatePw(Map<String, String> params);
 }
