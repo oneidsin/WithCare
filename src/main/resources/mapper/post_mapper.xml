@@ -4,9 +4,9 @@
    
    <mapper namespace="com.withcare.post.dao.PostDAO">
    		
-		<insert id="postWrite" parameterType="com.withcare.post.dto.PostDTO">
-		    INSERT INTO post (board_idx, id, post_title, post_content, com_yn,post_blind_yn)
-		    	VALUES (#{board_idx}, #{id}, #{post_title}, #{post_content}, #{com_yn},#{post_blind_yn})
+		<insert id="postWrite" parameterType="com.withcare.post.dto.PostDTO" useGeneratedKeys="true" keyProperty="post_idx" keyColumn="post_idx">
+		    INSERT INTO post (board_idx, id, post_title, post_content, com_yn, post_blind_yn)
+		    VALUES (#{board_idx}, #{id}, #{post_title}, #{post_content}, #{com_yn}, #{post_blind_yn})
 		</insert>
    		
    		<select id="postWriter" parameterType="int" resultType="String">
@@ -22,12 +22,12 @@
    				WHERE post_idx = #{post_idx}
    		</update>
    		
-   		<update id="postDelete">
+   		<update id="postDelete" parameterType="com.withcare.post.dto.PostDTO">
    			UPDATE post SET post_blind_yn = #{post_blind_yn} WHERE post_idx = #{post_idx}
    		</update>
    		
-   		<select id="postDetail" parameterType="com.withcare.post.dto.PostDTO">
-   			SELECT * FROM post WHERE post_idx=#{param1}
+   		<select id="postDetail" parameterType="int" resultType="com.withcare.post.dto.PostDTO">
+   			SELECT * FROM post WHERE post_idx=#{post_idx}
    		</select>
    		
    		<update id="upHit">
@@ -63,7 +63,7 @@
 		    SELECT COUNT(*) FROM post WHERE board_idx = #{board_idx}
 		</select>
    		
-		<select id="LikeType" resultType="int">
+		<select id="LikeType" parameterType="map" resultType="int">
 			SELECT like_type FROM likeYn WHERE id=#{param1} AND post_idx=#{param2}
 		</select>
 		
@@ -81,9 +81,23 @@
 				WHERE id = #{id} AND post_idx = #{post_idx}
 		</update>
    		
-   		<insert id="insertFile" parameterType="map">
+		<insert id="fileInsert" parameterType="com.withcare.post.dto.FileDTO" useGeneratedKeys="true" keyProperty="file_idx" keyColumn="file_idx">
 		    INSERT INTO file (post_idx, file_url)
 		    VALUES (#{post_idx}, #{file_url})
 		</insert>
-   		
+		
+   		<delete id="fileDelete" parameterType="String">
+		    DELETE FROM file WHERE file_idx = #{file_idx}
+		</delete>
+		
+		<select id="fileInfo" parameterType="String" resultType="map">
+		    SELECT file_idx, file_url, post_idx FROM file WHERE file_idx = #{file_idx}
+		</select>
+		
+		<select id="fileList" parameterType="int" resultType="map">
+		    SELECT file_idx, file_url
+		    FROM file
+		    WHERE post_idx = #{post_idx}
+		</select>
+		
    </mapper>
