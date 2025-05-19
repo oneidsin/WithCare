@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.withcare.member.service.JoinService;
+import com.withcare.util.JwtToken.JwtUtils;
 
 @CrossOrigin
 @RestController
@@ -57,6 +58,7 @@ public class JoinController {
 		
 		return result;
 	}
+   
 	
 	
 	
