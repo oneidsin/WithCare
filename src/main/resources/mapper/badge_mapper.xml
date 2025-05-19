@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.withcare.profile.dao.BadgeDAO">
-    <select id="getMemberBadgeList" parameterType="map">
+    <select id="getMemberBadgeList" parameterType="String" resultType="map">
         SELECT
             mb.id,
             b.bdg_idx,
@@ -21,4 +21,8 @@
         ORDER BY
             is_acquired DESC, b.bdg_idx ASC
     </select>
+
+    <!--<update id="getMemberAcquiredBadge" parameterType="String">
+        UPDATE badge SET
+    </update>-->
 </mapper>
