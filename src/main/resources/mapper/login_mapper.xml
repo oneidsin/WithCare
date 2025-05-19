@@ -22,5 +22,9 @@
     UPDATE member SET pw = #{newPw, jdbcType=VARCHAR} WHERE id = #{id}
 </update>
 
+<update id="visitCnt" parameterType="string">
+	 UPDATE profile SET access_cnt = IFNULL(access_cnt, 0) + 1 WHERE id = #{id}
+</update>
+
  
 </mapper>

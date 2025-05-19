@@ -14,4 +14,6 @@ public interface LoginDAO {
 	String findPw(String id, String name, String year, String email);
 
 	int updatePw(Map<String, String> params);
+
+	int visitCnt(String id);
 }

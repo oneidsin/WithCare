@@ -16,5 +16,8 @@ public interface ProfileDAO {
 	int updateProfile(ProfileDTO dto);
 
 	int increaseAccessCount(String id);
+
+	void insertProfile(String id);
+	
 	
 }

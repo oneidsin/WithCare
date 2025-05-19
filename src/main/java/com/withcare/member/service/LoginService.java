@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.withcare.member.dao.LoginDAO;
+import com.withcare.profile.dao.ProfileDAO;
 
 
 @Service
@@ -20,7 +21,11 @@ public class LoginService {
 
 	public boolean login(Map<String, String> params) {
 		int cnt = dao.login(params);
-		return cnt>0;
+		if(cnt > 0) {
+	        dao.visitCnt(params.get("id")); // 로그인 시 방문자 수 저
+	        return true;
+	    }
+	    return false;
 	}
 
 	public String findId(String name, String year, String email) {
