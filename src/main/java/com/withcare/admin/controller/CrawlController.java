@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
@@ -22,10 +23,10 @@ public class CrawlController {
     CrawlService svc;
 
     // 청년일보 크롤링
-    @GetMapping("/saveCrawlPostYouth")
-    public Map<String, Object> saveCrawlPostYouth() {
+    @GetMapping("/{id}/saveCrawlPostYouth")
+    public Map<String, Object> saveCrawlPostYouth(@PathVariable String id) {
         result = new HashMap<>();
-        result.put("result", svc.saveCrawlPostYouth());
+        result.put("result", svc.saveCrawlPostYouth(id));
         return result;
     }
 }

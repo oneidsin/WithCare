@@ -23,11 +23,14 @@ public class CrawlService {
     @Autowired
     CrawlDAO dao;
 
-    public List<Map<String, Object>> saveCrawlPostYouth() {
+    // 청년일보 크롤링
+    public List<Map<String, Object>> saveCrawlPostYouth(String id) {
+        // 크롬 드라이버 경로 설정
         System.setProperty("webdriver.chrome.driver", "C:\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe");
 
+        // 옵션 객체 생성
         ChromeOptions options = new ChromeOptions();
-        //options.addArguments("--start-maximized");
+        //options.addArguments("--start-maximized"); // 크롬 시작시 전체화면(현재는 X)
         options.addArguments("--disable-popup-blocking");
         options.addArguments("--remote-allow-origins=*");
         WebDriver driver = new ChromeDriver(options);
@@ -35,7 +38,7 @@ public class CrawlService {
         List<Map<String, Object>> results = new ArrayList<>();
 
         int page_num = 1; // 크롤링을 시작할 페이지
-        final int MAX_PAGES = 3; // 크롤링이 끝나는 페이지
+        final int MAX_PAGES = 1; // 크롤링이 끝나는 페이지
 
         // 크롤링을 시작할 URL
         String base_url = "https://www.youthdaily.co.kr/news/section.html?sec_no=51&page=";
@@ -59,61 +62,64 @@ public class CrawlService {
 
                 System.out.println("수집한 기사 링크 수: " + article_urls.size());
 
-                // 2. 각 링크를 순회하며 기사 정보 크롤링
+                // 2. 각 링크를 순회하며 기사 정보 가져오기
                 for (int i = 0; i < article_urls.size(); i++) {
                     try {
                         String original_url = article_urls.get(i);
 
-                        // url 중복 체크(DB 에서 조회)
-                        if (dao.duplicateUrl(original_url)) {
-                            log.info("이미 수집된 기사 : {}", original_url);
-                            continue;
-                        }
-
                         driver.get(original_url);
                         Thread.sleep(2000);
 
-                        // 2-1. 제목
+                        // 2-1. 제목 가져오기
                         String post_title = driver.findElement(By.cssSelector("div.art_top > h2")).getText();
-                        // 2-2. 본문
+
+                        // 제목 기준 중복 체크(DB 조회)
+                        if (dao.duplicateUrl(post_title)) {
+                            log.info("이미 수집된 기사 제목 : {}", post_title);
+                            continue;
+                        }
+
+                        // 2-2. 본문 가져오기
                         String post_content = driver.findElement(By.cssSelector("div.smartOutput")).getText();
+                        // 2-3. 본문에 기사 url 추가
+                        post_content += "\n\n[출처] " + original_url;
 
                         // 2-3. 이미지
                         String img_url = "";
                         try {
-                            WebElement img = driver.findElement(By.cssSelector("#news_bodyArea > div:nth-child(1) > img"));
+                            // 본문 전체에서 가장 첫 번째 img 태그를 가져옴
+                            WebElement img = driver.findElement(By.cssSelector("div.smartOutput img"));
                             img_url = img.getAttribute("src");
-                            if (!img_url.startsWith("http") || !img_url.startsWith("https")) {
+                            if (!img_url.startsWith("http") && !img_url.startsWith("https")) {
                                 img_url = "https://www.youthdaily.co.kr" + img_url;
                             }
                         } catch (Exception e) {
                             System.out.println("이미지 없음");
                         }
 
+
                         // 크롤링한 데이터를 result 에 저장
                         Map<String, Object> result = new HashMap<>();
-                        result.put("board_idx", 1);
+                        result.put("id", id); // 작성자 id
+                        result.put("board_idx", 2);
                         result.put("post_title", post_title);
                         result.put("post_content", post_content);
-                        result.put("news_url", original_url);
-                        result.put("img_url", img_url);
 
                         // 크롤링한 데이터를 DB 에 insert
                         dao.insertCrawlPost(result);
-                        log.info("crawl result : {}", result.get("post_idx"));
+                        log.info("크롤링 결과 : {}", result.get("post_idx"));
                         // 크롤링한 데이터 중 이미지가 있으면 file 테이블에 insert
                         if (!img_url.isEmpty()) {
                             result.put("file_url", img_url);
                             dao.insertCrawlFile(result);
                         }
 
-                        // 크롤링한 결과 전체를 리스트로 묶어 리턴하기 위한 코드
+                        // 크롤링한 결과 전체를 리스트로 묶어 리턴
                         results.add(result);
 
                         System.out.println("\n[기사 " + (i + 1) + "]");
                         System.out.println("제목: " + post_title);
                         System.out.println("본문: " + post_content);
-                        System.out.println("URL: " + original_url);
                         System.out.println("이미지: " + img_url);
 
                         Thread.sleep(1000);
