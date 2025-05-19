@@ -9,10 +9,12 @@ import com.withcare.profile.dto.ProfileDTO;
 @Mapper
 public interface ProfileDAO {
 
-	int insertProfile(Map<String, Object> map);
+	int saveProfile(Map<String, Object> map);
 	
 	ProfileDTO getProfileById(String id);
 
 	int updateProfile(ProfileDTO dto);
 
+	int increaseAccessCount(String id);
+	
 }

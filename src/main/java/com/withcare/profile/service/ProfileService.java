@@ -1,7 +1,5 @@
 package com.withcare.profile.service;
 
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +15,24 @@ public class ProfileService {
 	
 	Logger log = LoggerFactory.getLogger(getClass());
 
-	public boolean saveProfile(Map<String, Object> map) {
-        return dao.insertProfile(map) > 0;
-    }
+	/*
+	 * public boolean saveProfile(Map<String, Object> map) { return
+	 * dao.saveProfile(map) > 0; }
+	 */
 
+	// 프로필 보기
 	 public ProfileDTO getProfile(String id) {
 	        return dao.getProfileById(id);
 	}
 
+	 // 프로필 수정
 	 public int updateProfile(ProfileDTO dto) {
 	        return dao.updateProfile(dto);
 }
+
+	 // 타인 프로필 보기
+	public ProfileDTO getProfileById(String id) {
+		return dao.getProfileById(id);
+	}
+	
 }
