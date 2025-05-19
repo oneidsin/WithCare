@@ -19,12 +19,13 @@ public class CrawlController {
     Map<String, Object> result = null;
 
     @Autowired
-    CrawlService service;
+    CrawlService svc;
 
-//    @GetMapping("/saveCrawlPostYouth")
-//    public Map<String, Object> saveCrawlPostYouth() {
-//        result = new HashMap<>();
-//        result.put("result", service.saveCrawlPostYouth());
-//        return result;
-//    }
+    // 청년일보 크롤링
+    @GetMapping("/saveCrawlPostYouth")
+    public Map<String, Object> saveCrawlPostYouth() {
+        result = new HashMap<>();
+        result.put("result", svc.saveCrawlPostYouth());
+        return result;
+    }
 }
