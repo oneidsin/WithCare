@@ -62,5 +62,5 @@ public class BoardService {
         // PostService에서 실제 게시글 리스트 받아오기
         return postService.postList(board_idx, page);
     }
-	
+
 }
