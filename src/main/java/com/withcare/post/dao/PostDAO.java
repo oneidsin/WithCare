@@ -41,11 +41,13 @@ public interface PostDAO {
 
 	int userLevel(String userId);
 
-	int insertFile(Map<String, Object> param);
+	int fileInsert(Map<String, Object> param);
 
 	int fileIdx(String file_idx);
 
 	int fileDelete(String file_idx);
 
 	List<Map<String, String>> fileList(int post_idx);
+
+	Map<String, String> fileInfo(String file_idx);
 }

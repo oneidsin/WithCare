@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -36,41 +35,49 @@ public class PostController {
 	
 	// 게시글 작성 (PostMapping)
 	@PostMapping("/post/write")
-	public Map<String, Object>postWrite(
-			@ModelAttribute  PostDTO dto,
-			@RequestParam(value = "files", required = false) MultipartFile[] files,
-			@RequestHeader Map<String, String>header){
-		
-		if (files == null) {
-			files = new MultipartFile[] {};
-		}
-		
-		for (MultipartFile file : files) {
-			log.info("file name : "+file.getOriginalFilename());
-		}
-		
-		result = new HashMap<String, Object>();
-		
+	public Map<String, Object> postWrite(
+	        @RequestBody PostDTO dto, // 이거랑 multipartFile 이랑 자꾸 같이 쓰지 말라면서 겁나 갈궈서 그냥 파일 첨부랑 게시글 작성이랑 분리했습니당...ㅠ
+	        @RequestHeader Map<String, String> header) {
+
+	    Map<String, Object> result = new HashMap<>();
+
 	    dto.setId(header.get("id")); // 사용자 ID 설정
-	    
-		boolean success = svc.postWrite(dto,files);
-		result.put("idx", dto.getPost_idx());
-		result.put("success", success);
-		
-		return result;
+
+	    boolean success = svc.postWrite(dto);
+	    result.put("idx", dto.getPost_idx()); // 작성한 게시글 idx 가져오기
+	    result.put("success", success); // 성공 여부
+
+	    return result;
+	}
+	
+	// 파일 첨부
+	@PostMapping("/post/upload-files")
+	public Map<String, Object> uploadFiles(
+	        @RequestParam("post_idx") int postIdx,
+	        @RequestParam("files") MultipartFile[] files) {
+
+	    Map<String, Object> result = new HashMap<>();
+
+	    boolean success = svc.saveFiles(postIdx, files); // 파일 저장하기
+	    result.put("success", success);
+
+	    return result;
 	}
 	
 	// 게시글 수정 (PutMapping)
 	@PutMapping("/post/update")
 	public Map<String, Object>postUpdate(
-			@RequestBody PostDTO dto,
+	        PostDTO dto,
 			@RequestParam(value = "files", required = false) MultipartFile[] files,
+		    @RequestParam(value = "keepFileIds", required = false) List<String> keepFileIdx,
 			@RequestHeader Map<String, String>header){
 		
 	    if (files == null) {
 	        files = new MultipartFile[] {};
 	    }
 		
+	    log.info("수정 대상 파일 수: " + files.length);
+	    
 	    String userId = header.get("id");
 	    
 	    for (MultipartFile file : files) {
@@ -79,7 +86,7 @@ public class PostController {
 		
 	    result = new HashMap<String, Object>();
 	    
-		boolean success = svc.postUpdate(dto, userId,files);
+		boolean success = svc.postUpdate(dto, userId,files,keepFileIdx);
 		result.put("idx", dto.getPost_idx());
 		result.put("success", success);
 		
