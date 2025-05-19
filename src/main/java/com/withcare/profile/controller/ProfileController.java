@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,22 +27,17 @@ public class ProfileController {
 
 	Logger log = LoggerFactory.getLogger(getClass());
 
-	// 프로필 저장 post
-	@PostMapping("/profile")
-	public Map<String, Object> saveProfile(@RequestBody Map<String, Object> pro) {
-		result = new HashMap<String, Object>();
-
-		try {
-			boolean success = svc.saveProfile(pro);
-			result.put("success", success);
-			result.put("message", success ? "프로필 저장 완료" : "프로필 저장 실패");
-		} catch (Exception e) {
-			log.error("[오류] 프로필 저장 중 예외 발생", e);
-			result.put("success", false);
-			result.put("message", "서버 오류");
-		}
-		return result;
-	}
+	/*
+	 * // 프로필 저장 post
+	 * 
+	 * @PostMapping("/profile") public Map<String, Object> saveProfile(@RequestBody
+	 * Map<String, Object> pro) { result = new HashMap<String, Object>();
+	 * 
+	 * try { boolean success = svc.saveProfile(pro); result.put("success", success);
+	 * result.put("message", success ? "프로필 저장 완료" : "프로필 저장 실패"); } catch
+	 * (Exception e) { log.error("[오류] 프로필 저장 중 예외 발생", e); result.put("success",
+	 * false); result.put("message", "서버 오류"); } return result; }
+	 */
 
 	// 프로필 열람 get
 	@GetMapping("/profile/{id}")
@@ -74,7 +68,6 @@ public class ProfileController {
 			result.put("status", "error");
 			result.put("message", e.getMessage());
 		}
-
 		return result;
 	}
 
@@ -85,7 +78,6 @@ public class ProfileController {
 
 		try {
 			ProfileDTO dto = svc.getProfileById(id);
-
 			if (dto != null) {
 				result.put("status", "success");
 				result.put("profile", dto);
