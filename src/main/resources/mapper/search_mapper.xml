@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC   "-//mybatis.org//DTD Mapper 3.0//EN"
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.withcare.search.dao.SearchDAO">
+
+	<insert id="insertSearchHistory" parameterType="map">
+		INSERT INTO search (sch_id, board_idx, sch_keyword, sch_type)
+		VALUES (#{userId}, NULL, #{keyword}, 'post')
+	</insert>
+
+	<select id="searchPostsByKeyword"
+		resultType="com.withcare.search.dto.PostDTO" parameterType="map">
+		SELECT post_idx AS postIdx, post_title AS postTitle, post_content AS
+		postContent, post_create_date AS postCreateDate
+		FROM post
+		WHERE (post_title LIKE CONCAT('%', #{keyword}, '%') OR post_content LIKE
+		CONCAT('%', #{keyword}, '%'))
+		AND id = #{userId}
+		AND post_blind_yn = FALSE
+		ORDER BY post_update_date DESC
+	</select>
+
+
+
+</mapper>
