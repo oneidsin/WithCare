@@ -3,12 +3,28 @@ package com.withcare.profile.dto;
 public class ProfileDTO {
 
 	private String id;
-	private int cancerIdx;
-	private int stageIdx;
+	private int cancer_idx;
+	private int stage_idx;
 	private String profile_photo;
 	private String intro;
 	private boolean profile_yn;
 	private int accessCnt;
+
+	public int getCancer_idx() {
+		return cancer_idx;
+	}
+
+	public void setCancer_idx(int cancer_idx) {
+		this.cancer_idx = cancer_idx;
+	}
+
+	public int getStage_idx() {
+		return stage_idx;
+	}
+
+	public void setStage_idx(int stage_idx) {
+		this.stage_idx = stage_idx;
+	}
 
 	public String getId() {
 		return id;
@@ -16,22 +32,6 @@ public class ProfileDTO {
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	public int getCancerIdx() {
-		return cancerIdx;
-	}
-
-	public void setCancerIdx(int cancerIdx) {
-		this.cancerIdx = cancerIdx;
-	}
-
-	public int getStageIdx() {
-		return stageIdx;
-	}
-
-	public void setStageIdx(int stageIdx) {
-		this.stageIdx = stageIdx;
 	}
 
 	public String getProfile_photo() {
