@@ -43,3 +43,4 @@ src/main/resources/log4jdbc.log4j2.properties
 /.metadata/
 =======
 >>>>>>> origin/master
+*_BACKUP*
