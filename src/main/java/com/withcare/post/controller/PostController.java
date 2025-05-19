@@ -1,13 +1,16 @@
 package com.withcare.post.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.withcare.board.dto.BoardDTO;
+import com.withcare.post.dto.LikeDislikeDTO;
 import com.withcare.post.dto.PostDTO;
 import com.withcare.post.service.PostService;
 
@@ -34,12 +37,24 @@ public class PostController {
 	// 게시글 작성 (PostMapping)
 	@PostMapping("/post/write")
 	public Map<String, Object>postWrite(
-			@RequestBody PostDTO post_title,
+			@ModelAttribute  PostDTO dto,
+			@RequestParam(value = "files", required = false) MultipartFile[] files,
 			@RequestHeader Map<String, String>header){
 		
+		if (files == null) {
+			files = new MultipartFile[] {};
+		}
+		
+		for (MultipartFile file : files) {
+			log.info("file name : "+file.getOriginalFilename());
+		}
+		
 		result = new HashMap<String, Object>();
-		boolean success = svc.postWrite(post_title);
-		result.put("idx", post_title.getPost_idx());
+		
+	    dto.setId(header.get("id")); // 사용자 ID 설정
+	    
+		boolean success = svc.postWrite(dto,files);
+		result.put("idx", dto.getPost_idx());
 		result.put("success", success);
 		
 		return result;
@@ -48,26 +63,44 @@ public class PostController {
 	// 게시글 수정 (PutMapping)
 	@PutMapping("/post/update")
 	public Map<String, Object>postUpdate(
-			@RequestBody PostDTO post_title,
+			@RequestBody PostDTO dto,
+			@RequestParam(value = "files", required = false) MultipartFile[] files,
 			@RequestHeader Map<String, String>header){
 		
-		result = new HashMap<String, Object>();
-		boolean success = svc.postUpdate(post_title);
-		result.put("idx", post_title.getPost_idx());
+	    if (files == null) {
+	        files = new MultipartFile[] {};
+	    }
+		
+	    String userId = header.get("id");
+	    
+	    for (MultipartFile file : files) {
+			log.info("file name : "+file.getOriginalFilename());
+		}
+		
+	    result = new HashMap<String, Object>();
+	    
+		boolean success = svc.postUpdate(dto, userId,files);
+		result.put("idx", dto.getPost_idx());
 		result.put("success", success);
 		
+	    if (success) {
+	        List<Map<String, String>> photoList = svc.fileList(dto.getPost_idx());
+	        result.put("photos", photoList);
+	    }
 		return result;
 		
 	}
 	
-	// 게시글 삭제 (PutMapping 블라인드 처리라서 blind_yn 만 true 로 바꿔주면 될듯?)
+	// 게시글 삭제
 	@PutMapping("/post/delete")
 	public Map<String, Object>postDelete(
 			@RequestBody PostDTO dto,
 			@RequestHeader Map<String, String>header){
-		
+
+	    String userId = header.get("id");
+	    
 		result = new HashMap<String, Object>();
-		boolean success = svc.postDelete(dto);
+		boolean success = svc.postDelete(dto, userId);
 		result.put("idx", dto.getPost_idx());
 		result.put("success", success);
 		
@@ -75,28 +108,59 @@ public class PostController {
 	}
 	
 	// 게시글 상세보기 (GetMapping)
-	@PutMapping("/post/detail/{post_idx}")
+	@GetMapping("/post/detail/{post_idx}")
 	public Map<String, Object>postDetail(
-			@PathVariable String post_idx,
+			@PathVariable int post_idx,
 			@RequestHeader Map<String, String>header){
 
-		result = new HashMap<String, Object>();
-		PostDTO dto = svc.postDetail(Integer.parseInt(post_idx),true);
-		result.put("post", dto);
-		result.put("success", dto != null);
-		
-		return result;
+		return svc.postDetail(post_idx, true);
 	}
 	
-	// 게시글 리스트 (GetMapping) 수정해야 돼요ㅠㅠㅠㅠㅠㅠㅠㅠ
+	// 게시글 리스트 (GetMapping)
 	@GetMapping("/post/list/{page}")
 	public Map<String, Object> postList(
-			@PathVariable String page,
-			@RequestHeader Map<String, String> header){
-		
-		return svc.postList(Integer.parseInt(page));
+	        @PathVariable int page,
+	        @RequestParam int board_idx,
+	        @RequestHeader Map<String, String> header) {
+
+	    Map<String, Object> result = new HashMap<>();
+	    result = svc.postList(page, board_idx);
+
+	    return result;
 	}
 	
-	// 게시글 추천, 비추천 (GetMapping)
+	// 게시글 추천, 비추천 (PostMapping)
+	@PostMapping("/post/like")
+	public Map<String, Object> postLike(
+	        @RequestBody LikeDislikeDTO dto,
+	        @RequestHeader Map<String, String> header) {
+	    
+	    Map<String, Object> result = new HashMap<>();
+	    dto.setId(header.get("id"));
+
+	    boolean success = svc.handleLike(dto);
+	    result.put("success", success);
+	    return result;
+	}
+	
+	// 게시글 동록된 이미지 리스트 조회
+	@GetMapping("/file/list/{post_idx}")
+	public List<Map<String, String>> fileList(@PathVariable int post_idx) {
+	    return svc.fileList(post_idx); // 정상적으로 동작하는 기존 서비스 메서드
+	}
+	
+	@DeleteMapping("/file/{file_idx}")
+	public Map<String, Object> fileDelete(
+	    @PathVariable String file_idx,
+	    @RequestHeader Map<String, String> header) {
+
+	    Map<String, Object> result = new HashMap<>();
+	    String userId = header.get("id");
+
+	    boolean success = svc.fileDelete(file_idx, userId);
+	    result.put("success", success);
+
+	    return result;
+	}
 	
 }
