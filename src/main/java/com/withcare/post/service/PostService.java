@@ -28,23 +28,22 @@ public class PostService {
 	@Autowired PostDAO dao;
 	@Autowired BoardDAO boardDao;
 	
-    private final String uploadDir = "/uploads";
+	private final String uploadDir = System.getProperty("user.home") + "/uploads";
 	
-	public boolean postWrite(PostDTO dto, MultipartFile[] files) {
+	public boolean postWrite(PostDTO dto) {
 	    // 게시판 com_yn 가져오기
 	    boolean boardComYn = boardDao.boardComYn(dto.getBoard_idx());
-	    
-	    // 게시글에 적용
+
 	    dto.setCom_yn(boardComYn);
-	    
-        int row = dao.postWrite(dto);
-        if (row > 0 && files != null && files.length > 0) {
-            saveFiles(dto.getPost_idx(), files);
-        }
-        return row > 0;
+
+	    int row = dao.postWrite(dto);
+	    return row > 0;
 	}
 
-	private void saveFiles(int post_idx, MultipartFile[] files) {
+	public boolean saveFiles(int post_idx, MultipartFile[] files) {
+		
+		boolean success = true;
+		
         for (MultipartFile file : files) {
             if (file.isEmpty()) continue;
 
@@ -73,29 +72,55 @@ public class PostService {
                 param.put("post_idx", post_idx);
                 param.put("file_url", savedName);  // 혹은 full path로 저장하고 싶으면 변경
 
-                dao.insertFile(param);
+                dao.fileInsert(param);
 
             } catch (Exception e) {
                 e.printStackTrace();
+                success = false;
+                
                 // 파일 저장 실패시에도 무조건 실패처리할지, 로그만 남기고 진행할지 정책에 따라 조정 필요
             }
         }
+        return success;
     }
 
-	public boolean postUpdate(PostDTO dto, String userId, MultipartFile[] files) {
-		
-	    // 1) 게시글 작성자 조회
+	public boolean postUpdate(PostDTO dto, String userId, MultipartFile[] files, List<String> keepFileIdx) {
 	    String writerId = dao.postWriter(dto.getPost_idx());
 	    if (writerId == null || !writerId.equals(userId)) {
-	        // 작성자가 아니면 수정 불가
 	        return false;
 	    }
-		
-		int row = dao.postUpdate(dto);
-		if (row > 0 && files != null && files.length > 0) {
-            saveFiles(dto.getPost_idx(), files);
-        }
-		return row>0;
+
+	    int row = dao.postUpdate(dto);
+
+	    if (row > 0) {
+	        if ((files != null && files.length > 0) || (keepFileIdx != null && !keepFileIdx.isEmpty())) {
+	            // 기존 파일 리스트 조회 및 삭제 (keepFileIdx를 기준으로 삭제)
+	            List<Map<String, String>> currentFiles = dao.fileList(dto.getPost_idx());
+
+	            for (Map<String, String> file : currentFiles) {
+	            	String fileIdx = String.valueOf(file.get("file_idx"));
+	                if (keepFileIdx == null || !keepFileIdx.contains(fileIdx)) {
+	                    dao.fileDelete(fileIdx);
+	                    deleteFileIdx(file.get("file_url"));
+	                }
+	            }
+	        }
+
+	        // 새 파일 저장
+	        if (files != null && files.length > 0) {
+	            saveFiles(dto.getPost_idx(), files);
+	        }
+	    }
+	    return row > 0;
+	}
+
+	private void deleteFileIdx(String savedName) {
+	    try {
+	        java.nio.file.Path path = java.nio.file.Paths.get(uploadDir, savedName);
+	        java.nio.file.Files.deleteIfExists(path);
+	    } catch (Exception e) {
+	        log.error("파일 삭제 실패: " + savedName, e);
+	    }
 	}
 
 	public boolean postDelete(PostDTO dto, String userId) {
@@ -193,20 +218,36 @@ public class PostService {
 	}
 
 	public boolean fileDelete(String file_idx, String userId) {
-	    // 파일이 속한 게시글 확인 -> 작성자 권한 체크 필요
-	    int post_idx = dao.fileIdx(file_idx);
+	    // 1) 파일 정보 조회
+	    Map<String, String> fileInfo = dao.fileInfo(file_idx);
+	    if (fileInfo == null) {
+	        return false; // 파일 존재하지 않음
+	    }
+	    int post_idx = Integer.parseInt(fileInfo.get("post_idx"));
+	    
+	    // 2) 게시글 작성자 조회
 	    String writerId = dao.postWriter(post_idx);
-
-	    if (!writerId.equals(userId)) {
-	        // 권한 없으면 실패
+	    if (writerId == null) {
 	        return false;
 	    }
+	    
+	    // 3) 권한 체크 (작성자 또는 관리자만 삭제 가능)
+	    if (!writerId.equals(userId)) {
+	        int lv_idx = dao.userLevel(userId);
+	        if (lv_idx != 7) { // 관리자 권한 레벨 (예시)
+	            return false;
+	        }
+	    }
+	    
 	    // 파일 삭제
 	    int row = dao.fileDelete(file_idx);
 	    if (row > 0) {
-	        // 실제 저장된 파일도 삭제 처리 (파일시스템)
-	        // 실제 파일 경로 생성 후 삭제
+	    	// 실제 저장된 파일 삭제
+	        if (fileInfo != null) {
+	            deleteFileIdx(fileInfo.get("file_url"));
+	        }
 	    }
 	    return row > 0;
+	    
 	}
 }
