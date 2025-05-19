@@ -3,5 +3,22 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.withcare.profile.dao.BadgeDAO">
-
+    <select id="getMemberBadgeList" parameterType="map">
+        SELECT
+            mb.id,
+            b.bdg_idx,
+            b.bdg_name,
+            b.bdg_icon,
+            b.bdg_condition,
+            mb.bdg_sym_yn,
+            (mb.user_badge_idx IS NOT NULL) AS is_acquired
+        FROM
+            badge b
+                LEFT JOIN
+            member_badge mb ON b.bdg_idx = mb.bdg_idx AND mb.id = #{id}
+        WHERE
+            b.bdg_active_yn = true
+        ORDER BY
+            is_acquired DESC, b.bdg_idx ASC
+    </select>
 </mapper>

@@ -32,6 +32,7 @@ public class LoginService {
 	}
 
 	public boolean resetPw(String id, String newPw) {
+		log.info("resetPw 서비스 호출 - id: {}, newPw: {}", id, newPw);
 	    Map<String, String> map = new HashMap<>();
 	    map.put("id", id);
 	    map.put("newPw", newPw);
