@@ -31,10 +31,7 @@
             profile_yn = #{profile_yn},
             access_cnt = #{accessCnt}
         WHERE id = #{id}
-
     </update>
-   	
-   
    
    </mapper>
    

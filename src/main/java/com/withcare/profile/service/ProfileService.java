@@ -28,4 +28,8 @@ public class ProfileService {
 	 public int updateProfile(ProfileDTO dto) {
 	        return dao.updateProfile(dto);
 }
+
+	public ProfileDTO getProfileById(String id) {
+		return dao.getProfileById(id);
+	}
 }
