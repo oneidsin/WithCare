@@ -22,7 +22,7 @@ public class LoginService {
 	public boolean login(Map<String, String> params) {
 		int cnt = dao.login(params);
 		if(cnt > 0) {
-	        dao.visitCnt(params.get("id")); // 로그인 시 방문자 수 저
+	        dao.visitCnt(params.get("id")); // 로그인 시 방문자 수 저장
 	        return true;
 	    }
 	    return false;
