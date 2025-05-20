@@ -47,67 +47,78 @@ public class PostService {
 	}
 
 	public boolean saveFiles(int post_idx, MultipartFile[] files) {
-		
+		List<String> savedFileNames = new ArrayList<>();
 		boolean success = true;
-		
-        for (MultipartFile file : files) {
-            if (file.getSize() > 10 * 1024 * 1024) { // 10MB 제한
-                throw new IllegalArgumentException("파일 사이즈 초과");
-            }
-            
-            // MIME 타입 검사
-            if (!file.getContentType().startsWith("image/")) {
-                throw new IllegalArgumentException("이미지 파일만 업로드 가능합니다.");
-            }
 
-            // 확장자 검사 (jpg, jpeg, png만 허용)
-            String origin_name = file.getOriginalFilename();
-            if (origin_name == null || origin_name.lastIndexOf(".") == -1) {
-                throw new IllegalArgumentException("파일 이름이 잘못되었습니다.");
-            }
+        try {
+	        for (MultipartFile file : files) {
+	        	if (file.isEmpty()) continue; // file 이 없어도 에러 안나게 해놓은 거
+	        	
+	            if (file.getSize() > 10 * 1024 * 1024) { // 10MB 제한
+	                throw new IllegalArgumentException("파일 사이즈 초과");
+	            }
+	            
+	            // MIME 타입 검사
+	            if (!file.getContentType().startsWith("image/")) {
+	                throw new IllegalArgumentException("이미지 파일만 업로드 가능합니다.");
+	            }
+	
+	            // 확장자 검사 (jpg, jpeg, png만 허용)
+	            String origin_name = file.getOriginalFilename();
+	            if (origin_name == null || origin_name.lastIndexOf(".") == -1) {
+	                throw new IllegalArgumentException("파일 이름이 잘못되었습니다.");
+	            }
+	
+	            String ext = origin_name.substring(origin_name.lastIndexOf(".") + 1).toLowerCase(); // 작성자가 대문자로 넣으면 그거 변환
+	            if (!ext.equals("jpg") && !ext.equals("jpeg") && !ext.equals("png")) {
+	                throw new IllegalArgumentException("jpg, jpeg, png 확장자만 업로드 가능합니다.");
+	            }
+	
+	            String extension = origin_name.substring(origin_name.lastIndexOf(".")); // 확장자 "." 에서 자르기
+	            
+	            // UUID로 파일명 생성
+	            String savedName = UUID.randomUUID().toString() + extension;
+	            
+	                // 파일 저장 경로 생성
+	                Path path = Paths.get(uploadDir, savedName);
+	
+	                // 폴더가 없으면 생성
+	                Files.createDirectories(path.getParent());
+	
+	                // 실제 파일 저장
+	                file.transferTo(path.toFile());
+	
+	                // DB에 파일 URL 저장
+	                Map<String, Object> param = new HashMap<>();
+	                param.put("post_idx", post_idx);
+	                param.put("file_url", savedName);  // 혹은 full path로 저장하고 싶으면 변경
+	
+	                dao.fileInsert(param);
+	                savedFileNames.add(savedName); // 성공한 파일만 저장
+	                
+	            } 
+	        	
+	        	return true; // 모두 성공했을 경우
+	        	
+        }catch (Exception e) {
+	                e.printStackTrace();
 
-            String ext = origin_name.substring(origin_name.lastIndexOf(".") + 1).toLowerCase(); // 작성자가 대문자로 넣으면 그거 변환
-            if (!ext.equals("jpg") && !ext.equals("jpeg") && !ext.equals("png")) {
-                throw new IllegalArgumentException("jpg, jpeg, png 확장자만 업로드 가능합니다.");
-            }
-            
-            if (file.isEmpty()) continue; // file 이 없어도 에러 안나게 해놓은 거
-
-            try {
-                String originalName = file.getOriginalFilename();
-                String extension = "";
-
-                if (originalName != null && originalName.contains(".")) {
-                    extension = originalName.substring(originalName.lastIndexOf(".")); // 확장자 "." 에서 자르기
+            // 저장된 파일 시스템에서 삭제
+            for (String savedName : savedFileNames) {
+                try {
+                    Path path = Paths.get(uploadDir, savedName);
+                    Files.deleteIfExists(path);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    log.error("파일 시스템 삭제 실패: " + savedName, ex);
                 }
 
-                // UUID로 파일명 생성
-                String savedName = UUID.randomUUID().toString() + extension;
-
-                // 파일 저장 경로 생성
-                Path path = Paths.get(uploadDir, savedName);
-
-                // 폴더가 없으면 생성
-                Files.createDirectories(path.getParent());
-
-                // 파일 저장
-                file.transferTo(path.toFile());
-
-                // DB에 파일 URL 저장
-                Map<String, Object> param = new HashMap<>();
-                param.put("post_idx", post_idx);
-                param.put("file_url", savedName);  // 혹은 full path로 저장하고 싶으면 변경
-
-                dao.fileInsert(param);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                success = false;
-                
-                // 파일 저장 실패시에도 무조건 실패처리할지, 로그만 남기고 진행할지 정책에 따라 조정 필요
+                // DB에서도 삭제
+                dao.fileDelete(savedName); // file_url 기준으로 삭제
             }
+            return false;
         }
-        return success;
+    
     }
 
 	public boolean postUpdate(PostDTO dto, String userId, MultipartFile[] files, List<String> keepFileIdx) {

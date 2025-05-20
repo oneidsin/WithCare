@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -62,7 +61,7 @@ public class PostController {
 	
 	// 파일 첨부
 	@PostMapping("/post/file/upload")
-	public Map<String, Object> uploadFiles(
+	public Map<String, Object> fileUpload(
 	        @RequestParam("post_idx") int postIdx,
 	        @RequestParam("files") MultipartFile[] files,
 	        @RequestHeader Map<String, String> header) {
@@ -84,6 +83,7 @@ public class PostController {
 	    return result;
 	}
 	
+
 	// 게시글 수정 (PutMapping)
 	@PutMapping("/post/update")
 	public Map<String, Object> postUpdate(
@@ -128,6 +128,7 @@ public class PostController {
 	    return result;
 	}
 	
+
 	// 게시글 삭제
 	@PutMapping("/post/delete")
 	public Map<String, Object>postDelete(
@@ -193,7 +194,7 @@ public class PostController {
 	        login = true;
 	    }
 	    
-	    result.put("loninYN", login);
+	    result.put("loginYN", login);
 	    result.put("success", success);
 	    
 	    return result;
